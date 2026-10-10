@@ -7,7 +7,7 @@
 </style></head><body><div class="shell"><header><div class="brand"><span class="mark">/</span>문장집</div><span class="badge">● 내 기기 안에서만 처리</span></header><main><div class="eyebrow">PDF TO SENTENCES</div><h1>긴 PDF도,<br>복사하기 좋은 <span>한 문장씩.</span></h1><p class="intro">PDF를 넣으면 문장마다 <b>/desc</b>를 붙여드려요. 필요한 곳에 바로 붙여넣으세요.</p>
 <div class="workspace"><aside><section class="panel"><div class="panelhead"><h2><span class="step">01</span>PDF 가져오기</h2></div><div class="body"><div class="drop" id="drop"><span class="fileicon" aria-hidden="true">PDF</span><strong>여기에 PDF를 놓아주세요</strong><p class="small">텍스트 선택이 가능한 PDF · 최대 200 MB</p><button class="primary" id="pick">PDF 파일 선택</button><input type="file" id="file" accept=".pdf,application/pdf" hidden></div><p id="status" class="status" role="status" aria-live="polite">파일을 선택하면 자동으로 변환해요.</p><progress id="progress" max="100" value="0" hidden aria-label="PDF 처리 진행률"></progress><label class="option"><input id="layoutMode" type="checkbox"><span>추출 순서 보정<small>문장부호 위치가 뒤섞일 때 켜고 PDF를 다시 선택해요. 완벽하지 않을 수 있으니 원본과 비교해 주세요.</small></span></label><label class="option"><input id="lineMode" type="checkbox"><span>줄바꿈도 문장 구분으로 사용<small>대본·목록처럼 한 줄씩 나누고 싶을 때 켜세요.</small></span></label><p class="note">파일과 텍스트는 외부로 전송하지 않아요.<br>이미지로 된 PDF의 문자는 인식하지 않아요.</p></div></section><div class="example"><div class="label">이렇게 바뀌어요</div><p>문을 열었다. 바람이 불어왔다.</p><code>/desc 문을 열었다.<br>/desc 바람이 불어왔다.</code><button class="samplebtn" id="sample">예시로 먼저 사용해 보기 ↗</button></div></aside>
 <div><section class="panel"><div class="panelhead"><h2><span class="step">02</span>변환 결과</h2><span class="count" id="count">0개 문장</span></div><div class="toolbar"><div class="tabs"><button id="editTab" class="active" aria-pressed="true">전체 편집</button><button id="cardTab" aria-pressed="false">문장별 복사</button></div><button id="save" disabled>TXT 저장 ↓</button><button id="copy" class="primary" disabled>전체 복사</button></div><details class="findpanel" open><summary>단어 찾기 · 바꾸기</summary>
-<div class="findinputs"><label>찾을 단어<input id="findText" type="text" placeholder="예: PC" autocomplete="off"></label><label>바꿀 내용<input id="replaceText" type="text" placeholder="예: 아리아" autocomplete="off"></label></div>
+<div class="findinputs"><label>찾을 단어<input id="findText" type="text" placeholder="예: PC" autocomplete="off"></label><label>바꿀 내용<input id="replaceText" type="text" placeholder="예: 유나" autocomplete="off"></label></div>
 <div class="findoptions"><label><input id="matchCase" type="checkbox" checked> 대소문자 구분</label><label><input id="wordMatch" type="checkbox" checked> 완전 일치</label></div>
 <p class="small">완전 일치: PC를 찾을 때 NPC·PC1은 제외해요. PC는·PC에게처럼 한글 조사가 붙어도 찾아요. 조사는 자동으로 고치지 않아요.</p>
 <style>.pagination{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 0;flex-wrap:wrap}.pagination button{font-size:12px;padding:7px 12px}.pageinfo{font-size:12px;color:var(--muted)}#cards{scroll-margin-top:16px}</style>
@@ -28330,23 +28330,23 @@ let cardPage=0, cardText='';
 function renderCards(){
   const root=$('cards');root.replaceChildren();const all=lines();
   if(cardText!==$('output').value){cardPage=0;cardText=$('output').value;}
-  const pages=Math.max(1,Math.ceil(all.length/100));cardPage=Math.min(cardPage,pages-1);
+  const pages=Math.max(1,Math.ceil(all.length/30));cardPage=Math.min(cardPage,pages-1);
   if(!all.length){root.textContent='PDF를 선택하거나 원문을 입력해 주세요.';return;}
-  function navigate(page){cardPage=page;renderCards();root.scrollIntoView({block:'start'});root.querySelector('.pageinfo').focus({preventScroll:true});}
-  function pager(){
+  function navigate(page,scrollToTop){const x=window.scrollX,y=window.scrollY;cardPage=page;renderCards();if(scrollToTop)root.scrollIntoView({block:'start'});root.querySelector('.pageinfo').focus({preventScroll:true});if(!scrollToTop)window.scrollTo({left:x,top:y,behavior:'instant'});}
+  function pager(scrollToTop=false){
     const nav=document.createElement('nav');nav.className='pagination';nav.setAttribute('aria-label','문장 페이지 이동');
-    const prev=document.createElement('button');prev.textContent='← 이전';prev.disabled=cardPage===0;prev.onclick=()=>navigate(cardPage-1);
-    const info=document.createElement('span');info.className='pageinfo';info.tabIndex=-1;info.textContent=(cardPage+1)+' / '+pages+' 페이지 · '+(cardPage*100+1)+'–'+Math.min((cardPage+1)*100,all.length)+'번';
-    const next=document.createElement('button');next.textContent='다음 →';next.disabled=cardPage===pages-1;next.onclick=()=>navigate(cardPage+1);
+    const prev=document.createElement('button');prev.textContent='← 이전';prev.disabled=cardPage===0;prev.onclick=()=>navigate(cardPage-1,scrollToTop);
+    const info=document.createElement('span');info.className='pageinfo';info.tabIndex=-1;info.textContent=(cardPage+1)+' / '+pages+' 페이지 · '+(cardPage*30+1)+'–'+Math.min((cardPage+1)*30,all.length)+'번';
+    const next=document.createElement('button');next.textContent='다음 →';next.disabled=cardPage===pages-1;next.onclick=()=>navigate(cardPage+1,scrollToTop);
     nav.append(prev,info,next);return nav;
   }
   root.append(pager());const chunk=document.createDocumentFragment();
-  for(let i=cardPage*100;i<Math.min((cardPage+1)*100,all.length);i++){
+  for(let i=cardPage*30;i<Math.min((cardPage+1)*30,all.length);i++){
     const line=all[i],row=document.createElement('div');row.className='card';
     const num=document.createElement('span');num.className='num';num.textContent=String(i+1).padStart(2,'0');
     const p=document.createElement('p');p.textContent=line;const b=document.createElement('button');b.textContent='복사';b.setAttribute('aria-label',(i+1)+'번 문장 복사');b.onclick=()=>copyText(line);row.append(num,p,b);chunk.append(row);
   }
-  root.append(chunk,pager());
+  root.append(chunk,pager(true));
 }
 function tab(cards){$('cards').hidden=!cards;$('output').hidden=cards;$('editTab').classList.toggle('active',!cards);$('cardTab').classList.toggle('active',cards);$('editTab').setAttribute('aria-pressed',String(!cards));$('cardTab').setAttribute('aria-pressed',String(cards));if(cards)renderCards();}
 function setBusy(value){busy=value;for(const id of ['pick','sample','clear','convert','lineMode','layoutMode'])$(id).disabled=value;$('source').readOnly=value;$('progress').hidden=!value;}
